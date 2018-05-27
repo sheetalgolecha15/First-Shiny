@@ -1,0 +1,89 @@
+---
+title: "Assignment-2"
+author: "Sheetal"
+date: "5/24/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+if (!require(udpipe)){install.packages("udpipe")}
+if (!require(textrank)){install.packages("textrank")}
+if (!require(lattice)){install.packages("lattice")}
+if (!require(igraph)){install.packages("igraph")}
+if (!require(ggraph)){install.packages("ggraph")}
+if (!require(wordcloud)){install.packages("wordcloud")}
+
+library(udpipe)
+library(textrank)
+library(lattice)
+library(igraph)
+library(ggraph)
+library(ggplot2)
+library(wordcloud)
+library(stringr)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+y = readLines('/Users/sheetalgolecha/Documents/TA/Group Assignment Data files-20180501/hp.txt')
+X<-readFile(y)
+str(X)
+Y <- subset( X, select = -sentence )
+    Y
+  Z<-  create_wordcloud(Y,'VERB')
+  Z
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+require(stringr)
+read_File <- function(DF) {
+
+#nokia = readLines('/Users/sheetalgolecha/Documents/TA/Group Assignment Data files-20180501/hp.txt')
+DF  =  str_replace_all(DF, "<.*?>", "") # get rid of html junk 
+DF  =  str_replace_all(DF, '"', "") 
+DF  =  str_replace_all(DF, 'x', "") 
+# ?udpipe_download_model   # for langu listing and other details
+
+# load english model for annotation from working dir
+english_model = udpipe_load_model("./english-ud-2.0-170801.udpipe")  # file_model only needed
+ 
+# now annotate text dataset using ud_model above
+# system.time({   # ~ depends on corpus size
+  x <- udpipe_annotate(english_model, x = DF) #%>% as.data.frame() %>% head()
+  x <- as.data.frame(x)
+  return(x)
+#	})  # 13.76 secs
+}
+# str(x);  
+
+```
+
+
+
+```{r}
+create_wordcloud <-function(dataframe,wctype,frequency,size){
+  all_word = x %>% subset(., upos %in% wctype) 
+top_word = txt_freq(all_word$lemma)  # txt_freq() calcs noun freqs in desc order
+#head(top_nouns, 10)	
+#return(top_nouns)
+#df=as.data.frame(as.table(df_new))
+words_cloud<-top_word[top_word$freq>frequency,]
+#nrow(words_cloud)
+words_cloud %>% with(wordcloud(words_cloud$key, words_cloud$freq, max.words = size))
+}
+```
+

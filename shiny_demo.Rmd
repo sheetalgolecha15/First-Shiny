@@ -1,0 +1,168 @@
+
+
+
+```{r, eval=FALSE, echo=TRUE}
+
+#---------------------------------------------------------------------#
+#               k-means Clustering App                               #
+#---------------------------------------------------------------------#
+
+library("shiny")
+if (!require(udpipe)){install.packages("udpipe")}
+if (!require(textrank)){install.packages("textrank")}
+if (!require(lattice)){install.packages("lattice")}
+if (!require(igraph)){install.packages("igraph")}
+if (!require(ggraph)){install.packages("ggraph")}
+if (!require(wordcloud)){install.packages("wordcloud")}
+
+library(udpipe)
+library(textrank)
+library(lattice)
+library(igraph)
+library(ggraph)
+library(ggplot2)
+library(wordcloud)
+library(stringr)
+
+# Define ui function
+ui <- shinyUI(
+  fluidPage(
+    
+    titlePanel("Text Analytics"),
+    
+    sidebarLayout( 
+      
+      sidebarPanel(  
+        
+        fileInput("file", "Upload data (txt file)"),
+       selectInput("WC", "Choose word Cloud Type:",
+                  choices = c("VERB", "NOUN")),  
+      
+       downloadButton("downloadData", "Download the complete dataframe here"),
+        numericInput('Freq', 'Frequency of words', 15,
+                     min = 1, max = 100     ),
+       numericInput('Size', 'Size of word cloud', 100,
+                     min = 1, max = 300)    ,
+       
+       selectInput("COOC", "Parts OF Speech for Co-occurence", c("VERB","NOUN","ADJ","ADV","PROPN"), selected = c("VERB","ADJ","NOUN"), multiple = TRUE,
+  selectize = TRUE, width = NULL, size = NULL)),
+      mainPanel(
+        
+        tabsetPanel(type = "tabs",
+                    
+                    tabPanel("Overview",
+                             h4(p("Data input")),
+                             p("This apps only supports txt file which will help to read the text data and anlyse it.",align="justify"),
+                             p("Please refer to the link below for sample csv file."),
+                             a(href="https://github.com/sheetalgolecha15/First-Shiny/blob/master/hp.txt"
+                               ,"Sample data input file"),   
+                             br(),
+                             h4('How to use this App'),
+                             p('To use this app, click on', 
+                               span(strong("Upload data (csv file with header)")),
+                               'and uppload the csv data file. You can also change the number of clusters to fit in k-means clustering')),
+                    tabPanel("Data Frame", 
+                             tableOutput('DF')),
+                    
+                    tabPanel("Word Cloud",
+                             plotOutput('Word_Cloud')),
+                    
+                    tabPanel("Data",
+                             plotOutput('Cooccurence'))
+                    
+        ) # end of tabsetPanel
+      )# end of main panel
+    ) # end of sidebarLayout
+  )  # end if fluidPage
+) # end of UI
+
+
+# Define Server function
+server <- shinyServer(function(input, output) {
+  
+    Dataset <- reactive({
+    if (is.null(input$file)) { return(NULL) }
+    else{
+      Data <- readLines(input$file$datapath)
+      Data1<-read_File(Data)
+      Data1<-  subset( Data1, select = -sentence )
+      return(Data1)
+    }
+  })
+  
+  output$DF = renderTable({ 
+    X<-Dataset()
+
+   head(X,100) 
+   
+   
+  })
+  
+output$downloadData <- downloadHandler(
+    filename = function() {
+      paste(input$file,"_Dataframe", ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(Y, file, row.names = FALSE)
+    }
+  )
+  
+  WC_type <- reactive({
+    all_word = Dataset() %>% subset(., upos %in% input$WC) 
+top_word = txt_freq(all_word$lemma)  # txt_freq() calcs noun freqs in desc order
+
+words_cloud<-top_word[top_word$freq>input$Freq,]
+cloud<-words_cloud  %>% with(wordcloud(words_cloud$key, words_cloud$freq, max.words = input$Size))
+ return(cloud)
+  })
+    
+      
+  
+  output$Word_Cloud = renderPlot({
+WC_type()
+#WC_type()  %>% with(wordcloud(WC_type()$key, WC_type()$freq, max.words = size_wc()))
+ 
+  })
+  
+ Cooc <- reactive({
+   nokia_cooc <- cooccurrence(   	# try `?cooccurrence` for parm options
+		      x = subset(Dataset(), upos %in% input$COOC), 
+                      term = "lemma", 
+                      group = c("doc_id", "paragraph_id", "sentence_id"))
+   
+   wordnetwork <- head(nokia_cooc, 50)
+wordnetwork <- igraph::graph_from_data_frame(wordnetwork) # needs edgelist in first 2 colms.
+
+cooc_graph<-ggraph(wordnetwork, layout = "fr") +  
+
+  geom_edge_link(aes(width = cooc, edge_alpha = cooc), edge_colour = "orange") +  
+  geom_node_text(aes(label = name), col = "darkgreen", size = 4) +
+  
+  theme_graph(base_family = "Arial Narrow") +  
+  theme(legend.position = "none") +
+  
+  labs(title = "Cooccurrences within 3 words distance", subtitle = input$COOC)
+    return(cooc_graph)
+  })
+ 
+ output$Cooccurence = renderPlot({
+Cooc()
+#WC_type()  %>% with(wordcloud(WC_type()$key, WC_type()$freq, max.words = size_wc()))
+ 
+  })
+  
+})
+
+# Now call shinyApp function
+shinyApp(ui = ui, server = server)
+```
+
+The above is an illustrative small app we live-built in class. One can think of adding more user-input widgets and options, inserting more output objects and tabs and correspondingly more back-end server side analyses.  
+
+One can also thereafter host both ui.R and server.R files in github from where a `runGithub()` func from shiny can read the code into a live Rstudio session and render the app live.  
+
+With that, this demo ends. I hope you are prepared for some (relatively simple) shiny app constructions in your hoework assignments. :)
+
+Ciao
+
+Sudhir
