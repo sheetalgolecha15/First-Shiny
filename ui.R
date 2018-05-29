@@ -67,18 +67,22 @@ ui <- shinyUI(
                     
                     tabPanel("Overview",
                              h4(p("Data input")),
-                             p("This apps only supports txt or pdf file which will help to read the text data and analyse it. once you upload the file it atleat takes 2-3 mins to process depending on file size",align="justify"),
-                             p("Please refer to the link below for sample csv file."),
+                             p("This apps only supports txt or pdf file(please select the file tye before uploading) . once you upload the file it atleat takes 2-3 mins to process depending on file size",align="justify"),
+                             p("Please refer to the link below for sample txt and pdf file."),
                              a(href="https://github.com/sheetalgolecha15/First-Shiny/blob/master/hp.txt"
-                               ,"Sample data txt file"), 
-                             a(href="https://github.com/sheetalgolecha15/First-Shiny/blob/master/hp.txt"
-                               ,"Sample data txt file"), 
+                               ,"Sample data txt file\n"), 
+                             br(),
+                             a(href="https://github.com/sheetalgolecha15/First-Shiny/blob/master/G.pdf"
+                               ,"Sample data pdf file"), 
                              br(),
                              h4('How to use this App'),
                              p('To use this app, click on', 
-                               span(strong("Upload data (csv file with header)")),
-                               'and uppload the csv data file. You can also change the number of clusters to fit in k-means clustering')),
-                    tabPanel("Data Frame", 
+                               span(strong("Upload data (pdf or txt file please select the file tye before uploading)")),
+                               'and upload the txt  or pdf data file. you change the parts of speech type for co-ocurence and Word cloud.
+                               for the cloud you can also select the size. Finally it also shares the sentiment analysis. 
+                               we can select the  word repeation for sentiment Analysis')),
+                   
+                     tabPanel("Data Frame", 
                              tableOutput('DF')),
                     
                     tabPanel("Word Cloud",
