@@ -89,7 +89,7 @@ server <- shinyServer(function(input, output) {
       ungroup()
     #bing_word_counts
     bing_word_counts %>%
-      filter(n > 3) %>%
+      filter(n > input$word) %>%
       mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
       mutate(word = reorder(word, n)) %>%
       ggplot(aes(word, n, fill = sentiment)) +

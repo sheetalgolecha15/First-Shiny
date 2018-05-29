@@ -18,23 +18,20 @@ library(wordcloud)
 library(stringr)
 library(pdftools)
 library(tidyverse)
+
+
 read_File <- function(DF) {
   
-  #nokia = readLines('/Users/sheetalgolecha/Documents/TA/Group Assignment Data files-20180501/hp.txt')
   DF  =  str_replace_all(DF, "<.*?>", "") # get rid of html junk 
   DF  =  str_replace_all(DF, '"', "") 
   DF  =  str_replace_all(DF, 'x', "") 
-  # ?udpipe_download_model   # for langu listing and other details
-  
-  # load english model for annotation from working dir
+ 
   english_model = udpipe_load_model("./english-ud-2.0-170801.udpipe")  # file_model only needed
   
-  # now annotate text dataset using ud_model above
-  # system.time({   # ~ depends on corpus size
   x <- udpipe_annotate(english_model, x = DF) #%>% as.data.frame() %>% head()
   x <- as.data.frame(x)
   return(x)
-  #	})  # 13.76 secs
+
 }
 # Define ui function
 ui <- shinyUI(
@@ -70,9 +67,10 @@ ui <- shinyUI(
                              p("This apps only supports txt or pdf file which will help to read the text data and analyse it. once you upload the file it atleat takes 2-3 mins to process depending on file size",align="justify"),
                              p("Please refer to the link below for sample csv file."),
                              a(href="https://github.com/sheetalgolecha15/First-Shiny/blob/master/hp.txt"
-                               ,"Sample data txt file"), 
-                             a(href="https://github.com/sheetalgolecha15/First-Shiny/blob/master/hp.txt"
-                               ,"Sample data txt file"), 
+                               ,"Sample data txt file\n"), 
+                             br(),
+                             a(href="https://github.com/sheetalgolecha15/First-Shiny/blob/master/G.pdf"
+                               ,"Sample data pdf file"), 
                              br(),
                              h4('How to use this App'),
                              p('To use this app, click on', 
@@ -187,7 +185,7 @@ server <- shinyServer(function(input, output) {
       ungroup()
     #bing_word_counts
     bing_word_counts %>%
-      filter(n > 3) %>%
+      filter(n > input$word) %>%
       mutate(n = ifelse(sentiment == "negative", -n, n)) %>%
       mutate(word = reorder(word, n)) %>%
       ggplot(aes(word, n, fill = sentiment)) +
