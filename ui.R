@@ -5,7 +5,7 @@ if (!require(lattice)){install.packages("lattice")}
 if (!require(igraph)){install.packages("igraph")}
 if (!require(ggraph)){install.packages("ggraph")}
 if (!require(wordcloud)){install.packages("wordcloud")}
-if (!require(wordcloud)){install.packages("pdftools")}
+if (!require(pdftools)){install.packages("pdftools")}
 if (!require(tidyverse)){install.packages("tidyverse")}
 #install.packages("pdftools")
 library(udpipe)
